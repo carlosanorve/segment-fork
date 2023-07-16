@@ -353,6 +353,10 @@ static BOOL wasSetupFromFile = NO;
     NSString *writeKey = [dict objectForKey: @"com.claimsforce.segment.WRITE_KEY"];
     BOOL trackApplicationLifecycleEvents = [[dict objectForKey: @"com.claimsforce.segment.TRACK_APPLICATION_LIFECYCLE_EVENTS"] boolValue];
     BOOL isAmplitudeIntegrationEnabled = [[dict objectForKey: @"com.claimsforce.segment.ENABLE_AMPLITUDE_INTEGRATION"] boolValue];
+    NSString *cdnSettingsProxyHost = [dict objectForKey: @"com.claimsforce.segment.CDN_SETTINGS_PROXY_HOST"];
+    NSString *cdnProxyHost = [dict objectForKey: @"com.claimsforce.segment.CDN_PROXY_HOST"];
+    NSString *apiProxyHost = [dict objectForKey: @"com.claimsforce.segment.API_PROXY_HOST"];
+
     if(!writeKey) {
         return nil;
     }
@@ -362,6 +366,32 @@ static BOOL wasSetupFromFile = NO;
     if (isAmplitudeIntegrationEnabled) {
       [configuration use:[SEGAmplitudeIntegrationFactory instance]];
     }
+    configuration.requestFactory = ^(NSURL *url) {
+        NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+
+        NSString *segmentHost = components.host;
+        NSLog(@"segmentdev segmentHost: %@", segmentHost);
+        if ([segmentHost isEqualToString:@"api.segment.io"])
+        {
+           NSLog(@"Change proxy connection: api.segment.io");
+           components.host = apiProxyHost;
+           NSLog(@"New proxy connection: %@", apiProxyHost);
+        }else if ([segmentHost isEqualToString:@"cdn.segment.com"])
+        {
+           NSLog(@"Change proxy connection: cdn.segment.com");
+           components.host = cdnProxyHost;
+           NSLog(@"New proxy connection: %@", cdnProxyHost);
+        }else if ([segmentHost isEqualToString:@"cdn-settings.segment.com"])
+        {
+           NSLog(@"Change proxy connection: cdn-settings.segment.com");
+           components.host = cdnSettingsProxyHost;
+           NSLog(@"New proxy connection: %@", cdnSettingsProxyHost);
+        }
+
+        NSURL *transformedURL = components.URL;
+
+        return [NSMutableURLRequest requestWithURL:transformedURL];
+    };
 
     return configuration;
 }
@@ -371,16 +401,49 @@ static BOOL wasSetupFromFile = NO;
     BOOL trackApplicationLifecycleEvents = [[dict objectForKey: @"trackApplicationLifecycleEvents"] boolValue];
     BOOL isAmplitudeIntegrationEnabled = [[dict objectForKey: @"amplitudeIntegrationEnabled"] boolValue];
     BOOL isAppsflyerIntegrationEnabled = [[dict objectForKey: @"appsflyerIntegrationEnabled"] boolValue];
+    NSString *apiProxyHost = [dict objectForKey: @"apiProxyHost"];
+    NSString *cdnProxyHost = [dict objectForKey: @"cdnProxyHost"];
+    NSString *cdnSettingsProxyHost = [dict objectForKey: @"cdnSettingsProxyHost"];
+
     SEGAnalyticsConfiguration *configuration = [SEGAnalyticsConfiguration configurationWithWriteKey:writeKey];
+
     configuration.trackApplicationLifecycleEvents = trackApplicationLifecycleEvents;
 
     if (isAmplitudeIntegrationEnabled) {
       [configuration use:[SEGAmplitudeIntegrationFactory instance]];
     }
 
+
     if (isAppsflyerIntegrationEnabled) {
       [configuration use:[SEGAppsFlyerIntegrationFactory instance]];
     }
+
+    configuration.requestFactory = ^(NSURL *url) {
+        NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+
+        NSString *segmentHost = components.host;
+        NSLog(@"segmentdev segmentHost: %@", segmentHost);
+        if ([segmentHost isEqualToString:@"api.segment.io"])
+        {
+            NSLog(@"Change proxy connection: api.segment.io");
+            components.host = apiProxyHost;
+            NSLog(@"New proxy connection: %@", apiProxyHost);
+        }else if ([segmentHost isEqualToString:@"cdn.segment.com"])
+        {
+            NSLog(@"Change proxy connection: cdn.segment.com");
+            components.host = cdnProxyHost;
+            NSLog(@"New proxy connection: %@", cdnProxyHost);
+        }else if ([segmentHost isEqualToString:@"cdn-settings.segment.com"])
+        {
+            NSLog(@"Change proxy connection: cdn-settings.segment.com");
+            components.host = cdnSettingsProxyHost;
+            NSLog(@"New proxy connection: %@", cdnSettingsProxyHost);
+        }
+
+        NSURL *transformedURL = components.URL;
+
+        return [NSMutableURLRequest requestWithURL:transformedURL];
+    };
 
     return configuration;
 }

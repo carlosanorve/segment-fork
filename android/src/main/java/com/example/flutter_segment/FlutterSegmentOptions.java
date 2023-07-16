@@ -10,19 +10,28 @@ public class FlutterSegmentOptions {
     private final Boolean amplitudeIntegrationEnabled;
     private final Boolean appsflyerIntegrationEnabled;
     private final Boolean debug;
+    private final String cdnSettingsProxyHost;
+    private final String cdnProxyHost;
+    private final String apiProxyHost;
 
     public  FlutterSegmentOptions(
             String writeKey,
             Boolean trackApplicationLifecycleEvents,
             Boolean amplitudeIntegrationEnabled,
             Boolean appsflyerIntegrationEnabled,
-            Boolean debug
+            Boolean debug,
+            String cdnSettingsProxyHost,
+            String cdnProxyHost,
+            String apiProxyHost
     ) {
         this.writeKey = writeKey;
         this.trackApplicationLifecycleEvents = trackApplicationLifecycleEvents;
         this.amplitudeIntegrationEnabled = amplitudeIntegrationEnabled;
         this.appsflyerIntegrationEnabled = appsflyerIntegrationEnabled;
         this.debug = debug;
+        this.cdnSettingsProxyHost = cdnSettingsProxyHost;
+        this.cdnProxyHost = cdnProxyHost;
+        this.apiProxyHost = apiProxyHost;
     }
 
     public String getWriteKey() {
@@ -45,13 +54,28 @@ public class FlutterSegmentOptions {
         return debug;
     }
 
+    public String getCdnSettingsProxyHost() {
+        return cdnSettingsProxyHost;
+    }
+
+    public String getCdnProxyHost() {
+        return cdnProxyHost;
+    }
+
+    public String getApiProxyHost() {
+        return apiProxyHost;
+    }
+
     static FlutterSegmentOptions create(Bundle bundle) {
         String writeKey = bundle.getString("com.claimsforce.segment.WRITE_KEY");
         Boolean trackApplicationLifecycleEvents = bundle.getBoolean("com.claimsforce.segment.TRACK_APPLICATION_LIFECYCLE_EVENTS");
         Boolean isAmplitudeIntegrationEnabled = bundle.getBoolean("com.claimsforce.segment.ENABLE_AMPLITUDE_INTEGRATION", false);
         Boolean isAppsflyerIntegrationEnabled = bundle.getBoolean("com.claimsforce.segment.ENABLE_APPSFLYER_INTEGRATION", false);
         Boolean debug = bundle.getBoolean("com.claimsforce.segment.DEBUG", false);
-        return new FlutterSegmentOptions(writeKey, trackApplicationLifecycleEvents, isAmplitudeIntegrationEnabled, isAppsflyerIntegrationEnabled, debug);
+        String cdnSettingsProxyHost = bundle.getString("com.claimsforce.segment.CDN_SETTINGS_PROXY_HOST");
+        String cdnProxyHost = bundle.getString("com.claimsforce.segment.CDN_PROXY_HOST");
+        String apiProxyHost = bundle.getString("com.claimsforce.segment.API_PROXY_HOST");
+        return new FlutterSegmentOptions(writeKey, trackApplicationLifecycleEvents, isAmplitudeIntegrationEnabled, isAppsflyerIntegrationEnabled, debug, cdnSettingsProxyHost, cdnProxyHost, apiProxyHost);
     }
 
     static FlutterSegmentOptions create(HashMap<String, Object> options) {
@@ -60,7 +84,10 @@ public class FlutterSegmentOptions {
         Boolean isAmplitudeIntegrationEnabled = orFalse((Boolean) options.get("amplitudeIntegrationEnabled"));
         Boolean isAppsflyerIntegrationEnabled = orFalse((Boolean) options.get("appsflyerIntegrationEnabled"));
         Boolean debug = orFalse((Boolean) options.get("debug"));
-        return new FlutterSegmentOptions(writeKey, trackApplicationLifecycleEvents, isAmplitudeIntegrationEnabled, isAppsflyerIntegrationEnabled, debug);
+        String cdnSettingsProxyHost = (String) options.get("cdnSettingsProxyHost");
+        String cdnProxyHost = (String) options.get("cdnProxyHost");
+        String apiProxyHost = (String) options.get("apiProxyHost");
+        return new FlutterSegmentOptions(writeKey, trackApplicationLifecycleEvents, isAmplitudeIntegrationEnabled, isAppsflyerIntegrationEnabled, debug, cdnSettingsProxyHost, cdnProxyHost, apiProxyHost);
     }
 
     private static Boolean orFalse(Boolean value) {

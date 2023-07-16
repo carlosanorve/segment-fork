@@ -1,12 +1,11 @@
 package com.example.flutter_segment;
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
-
 import com.segment.analytics.Analytics;
+import com.segment.analytics.ConnectionFactory;
 import com.segment.analytics.Middleware;
 import com.segment.analytics.Properties;
 import com.segment.analytics.Traits;
@@ -15,13 +14,12 @@ import com.segment.analytics.integrations.BasePayload;
 import com.segment.analytics.android.integrations.amplitude.AmplitudeIntegration;
 import com.segment.analytics.android.integrations.appsflyer.AppsflyerIntegration;
 import static com.segment.analytics.Analytics.LogLevel;
-
 import androidx.annotation.NonNull;
-
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Map;
-
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -62,11 +60,35 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
     }
   }
 
+  private final static String defaultCdnSettingsHost = "cdn-settings.segment.com";
+  private final static String defaultCdnHost = "cdn.segment.com";
+  private final static String defaultApiHost = "api.segment.io";
+
   private void setupChannels(FlutterSegmentOptions options) {
     try {
-      Analytics.Builder analyticsBuilder = new Analytics.Builder(applicationContext, options.getWriteKey());
-      if (options.getTrackApplicationLifecycleEvents()) {
-        Log.i("FlutterSegment", "Lifecycle events enabled");
+      if (options.getWriteKey() != null) {
+        Analytics.Builder analyticsBuilder = new Analytics.Builder(applicationContext, options.getWriteKey());
+        analyticsBuilder.connectionFactory(new ConnectionFactory() {
+
+          @Override protected HttpURLConnection openConnection(String url) throws IOException {
+            Log.i("FlutterSegment=URLIn", url);
+            if (options.getCdnSettingsProxyHost() != null && url.contains(defaultCdnSettingsHost)) {
+              url = url.replace(defaultCdnSettingsHost, options.getCdnSettingsProxyHost());
+              Log.i("FlutterSegment=URLOut", url);
+            }
+            if (options.getCdnProxyHost() != null && url.contains(defaultCdnHost)) {
+              url = url.replace(defaultCdnHost, options.getCdnProxyHost());
+              Log.i("FlutterSegment=URLOut", url);
+            }
+            if (options.getApiProxyHost() != null && url.contains(defaultApiHost)) {
+              url = url.replace(defaultApiHost, options.getApiProxyHost());
+              Log.i("FlutterSegment=URLOut", url);
+            }
+            return super.openConnection(url);
+          }
+        });
+        if (options.getTrackApplicationLifecycleEvents()) {
+          Log.i("FlutterSegment", "Lifecycle events enabled");
 
         analyticsBuilder.trackApplicationLifecycleEvents();
       } else {
