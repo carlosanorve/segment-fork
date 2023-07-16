@@ -90,63 +90,64 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
         if (options.getTrackApplicationLifecycleEvents()) {
           Log.i("FlutterSegment", "Lifecycle events enabled");
 
-        analyticsBuilder.trackApplicationLifecycleEvents();
-      } else {
-        Log.i("FlutterSegment", "Lifecycle events are not been tracked");
-      }
+          analyticsBuilder.trackApplicationLifecycleEvents();
+        } else {
+          Log.i("FlutterSegment", "Lifecycle events are not been tracked");
+        }
 
-      if (options.getDebug()) {
-        analyticsBuilder.logLevel(LogLevel.DEBUG);
-      }
+        if (options.getDebug()) {
+          analyticsBuilder.logLevel(LogLevel.DEBUG);
+        }
 
-      if (options.isAmplitudeIntegrationEnabled()) {
-        analyticsBuilder.use(AmplitudeIntegration.FACTORY);
-      }
+        if (options.isAmplitudeIntegrationEnabled()) {
+          analyticsBuilder.use(AmplitudeIntegration.FACTORY);
+        }
 
-      if (options.isAppsflyerIntegrationEnabled()) {
-        analyticsBuilder.use(AppsflyerIntegration.FACTORY);
-      }
+        if (options.isAppsflyerIntegrationEnabled()) {
+          analyticsBuilder.use(AppsflyerIntegration.FACTORY);
+        }
 
-      // Here we build a middleware that just appends data to the current context
-      // using the [deepMerge] strategy.
-      analyticsBuilder.useSourceMiddleware(
-              new Middleware() {
-                @Override
-                public void intercept(Chain chain) {
-                  try {
-                    if (appendToContextMiddleware == null) {
+        // Here we build a middleware that just appends data to the current context
+        // using the [deepMerge] strategy.
+        analyticsBuilder.useSourceMiddleware(
+                new Middleware() {
+                  @Override
+                  public void intercept(Chain chain) {
+                    try {
+                      if (appendToContextMiddleware == null) {
+                        chain.proceed(chain.payload());
+                        return;
+                      }
+
+                      BasePayload payload = chain.payload();
+                      Map<String, Object> originalContext = new LinkedHashMap<>(payload.context());
+                      Map<String, Object> mergedContext = FlutterSegmentPlugin.deepMerge(
+                              originalContext,
+                              appendToContextMiddleware
+                      );
+
+                      BasePayload newPayload = payload.toBuilder()
+                              .context(mergedContext)
+                              .build();
+
+                      chain.proceed(newPayload);
+                    } catch (Exception e) {
+                      Log.e("FlutterSegment", e.getMessage());
                       chain.proceed(chain.payload());
-                      return;
                     }
-
-                    BasePayload payload = chain.payload();
-                    Map<String, Object> originalContext = new LinkedHashMap<>(payload.context());
-                    Map<String, Object> mergedContext = FlutterSegmentPlugin.deepMerge(
-                            originalContext,
-                            appendToContextMiddleware
-                    );
-
-                    BasePayload newPayload = payload.toBuilder()
-                            .context(mergedContext)
-                            .build();
-
-                    chain.proceed(newPayload);
-                  } catch (Exception e) {
-                    Log.e("FlutterSegment", e.getMessage());
-                    chain.proceed(chain.payload());
                   }
                 }
-              }
-      );
+        );
 
-      // Set the initialized instance as globally accessible.
-      // It may throw an exception if we are trying to re-register a singleton Analytics instance.
-      // This state may happen after the app is popped (back button until the app closes)
-      // and opened again from the TaskManager.
-      try {
-        Analytics.setSingletonInstance(analyticsBuilder.build());
-      } catch (IllegalStateException e) {
-        Log.w("FlutterSegment", e.getMessage());
+        // Set the initialized instance as globally accessible.
+        // It may throw an exception if we are trying to re-register a singleton Analytics instance.
+        // This state may happen after the app is popped (back button until the app closes)
+        // and opened again from the TaskManager.
+        try {
+          Analytics.setSingletonInstance(analyticsBuilder.build());
+        } catch (IllegalStateException e) {
+          Log.w("FlutterSegment", e.getMessage());
+        }
       }
     } catch (Exception e) {
       Log.e("FlutterSegment", e.getMessage());
