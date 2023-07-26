@@ -27,11 +27,16 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 
+import com.appsflyer.AppsFlyerLib;
+import com.appsflyer.attribution.AppsFlyerRequestListener;
+import com.appsflyer.AppsFlyerConversionListener;
+
 /** FlutterSegmentPlugin */
 public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
   private Context applicationContext;
   private MethodChannel methodChannel;
   private final PropertiesMapper propertiesMapper = new PropertiesMapper();
+  private static final String TAG = "AppsFlyer-Segment";
 
   static HashMap<String, Object> appendToContextMiddleware;
 
@@ -105,6 +110,7 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
 
         if (options.isAppsflyerIntegrationEnabled()) {
           analyticsBuilder.use(AppsflyerIntegration.FACTORY);
+          Log.d("appsflyer", "test");
         }
 
         // Here we build a middleware that just appends data to the current context
@@ -209,6 +215,30 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
       HashMap<String, Object> configData = call.argument("options");
       FlutterSegmentOptions options = FlutterSegmentOptions.create(configData);
       this.setupChannels(options);
+
+      AppsFlyerLib.getInstance().setDebugLog(true);
+
+      AppsFlyerLib.getInstance().init("SefkBG76uAYCK6St9Xcw3h",
+          null, applicationContext);
+      // AppsFlyerLib.getInstance().waitForCustomerUserId(true);
+      AppsFlyerLib.getInstance().addPushNotificationDeepLinkPath("test_dev_qa");
+      AppsFlyerLib.getInstance().start(applicationContext,
+          "SefkBG76uAYCK6St9Xcw3h",
+          new AppsFlyerRequestListener() {
+            @Override
+            public void onSuccess() {
+              Log.i("APPSFLYER", "AppsFlyer Android - Launch sent successfully, got 200" +
+                  " response code from server");
+            }
+
+            @Override
+            public void onError(int i, @NonNull String s) {
+              Log.e("APPSFLYER", "AppsFlyer Android - Launch failed to be sent:\n" +
+                  "Error code: " + i + "\n"
+                  + "Error description: " + s);
+            }
+          });
+
       result.success(true);
     } catch (Exception e) {
       result.error("FlutterSegmentException", e.getLocalizedMessage(), null);
