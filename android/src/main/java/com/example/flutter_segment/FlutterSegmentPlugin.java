@@ -13,7 +13,6 @@ import com.segment.analytics.Traits;
 import com.segment.analytics.Options;
 import com.segment.analytics.integrations.BasePayload;
 import com.segment.analytics.android.integrations.amplitude.AmplitudeIntegration;
-import com.segment.analytics.android.integrations.appsflyer.AppsflyerIntegration;
 import static com.segment.analytics.Analytics.LogLevel;
 import androidx.annotation.NonNull;
 import java.io.IOException;
@@ -28,7 +27,6 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import main.java.com.example.flutter_segment.AppsflyerIntegrationManual;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 
 // import com.appsflyer.AppsFlyerLib;
@@ -131,7 +129,7 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
         }
 
         if (options.isAppsflyerIntegrationEnabled()) {
-          analyticsBuilder.use(AppsflyerIntegration.FACTORY);
+          analyticsBuilder.use(CustomAppsFlyer.FACTORY);
           Log.d("appsflyer", "test");
         }
 
@@ -238,8 +236,8 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
       FlutterSegmentOptions options = FlutterSegmentOptions.create(configData);
       this.setupChannels(options);
 
-      AppsflyerIntegrationManual.setManualMode(true);
-      AppsflyerIntegrationManual.startAppsFlyer(applicationContext);
+      //CustomAppsFlyer.setManualMode(true);
+      //CustomAppsFlyer.startAppsFlyer(applicationContext);
       Log.d("APPSFLYER", "testest ");
 
       // AppsFlyerLib.getInstance().start(applicationContext);
