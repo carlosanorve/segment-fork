@@ -30,26 +30,6 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import com.segment.analytics.android.integrations.firebase.FirebaseIntegration;
 
-// import com.appsflyer.AppsFlyerLib;
-// import com.appsflyer.attribution.AppsFlyerRequestListener;
-// import com.appsflyer.AppsFlyerConversionListener;
-// import com.segment.analytics.integrations.Integration;
-// import com.segment.analytics.ValueMap;
-// import com.appsflyer.internal.platform_extension.Plugin;
-// import com.appsflyer.internal.platform_extension.PluginInfo;
-
-// import com.appsflyer.AFInAppEventParameterName;
-// import com.appsflyer.AFLogger;
-// import com.appsflyer.AppsFlyerConversionListener;
-// import com.appsflyer.AppsFlyerLib;
-// import com.appsflyer.deeplink.DeepLinkListener;
-// import com.appsflyer.deeplink.DeepLinkResult;
-// import com.appsflyer.internal.platform_extension.Plugin;
-// import com.appsflyer.internal.platform_extension.PluginInfo;
-// import com.segment.analytics.integrations.Logger;
-// import android.app.Application;
-// import static com.segment.analytics.internal.Utils.transform;
-// import android.app.Activity;
 
 /** FlutterSegmentPlugin */
 public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
@@ -238,8 +218,8 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
       FlutterSegmentOptions options = FlutterSegmentOptions.create(configData);
       this.setupChannels(options);
 
-      //CustomAppsFlyer.setManualMode(true);
-      //CustomAppsFlyer.startAppsFlyer(applicationContext);
+      // CustomAppsFlyer.setManualMode(true);
+      // CustomAppsFlyer.startAppsFlyer(applicationContext);
       Log.d("APPSFLYER", "testest ");
 
       // AppsFlyerLib.getInstance().start(applicationContext);
