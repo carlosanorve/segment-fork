@@ -28,6 +28,7 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import com.segment.analytics.android.integrations.firebase.FirebaseIntegration;
 
 // import com.appsflyer.AppsFlyerLib;
 // import com.appsflyer.attribution.AppsFlyerRequestListener;
@@ -132,6 +133,7 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
           analyticsBuilder.use(CustomAppsFlyer.FACTORY);
           Log.d("appsflyer", "test");
         }
+        analyticsBuilder.use(FirebaseIntegration.FACTORY);
 
         // Here we build a middleware that just appends data to the current context
         // using the [deepMerge] strategy.

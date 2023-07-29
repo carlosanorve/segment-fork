@@ -77,11 +77,11 @@ public class CustomAppsFlyer extends Integration<AppsFlyerLib> {
 
     private void updateEndUserAttributes() {
         this.appsflyer.setCustomerUserId(this.customerUserId);
-        this.logger.verbose("appsflyer.setCustomerUserId(%s)", new Object[]{this.customerUserId});
+        this.logger.verbose("appsflyer.setCustomerUserId(%s)", new Object[] { this.customerUserId });
         this.appsflyer.setCurrencyCode(this.currencyCode);
-        this.logger.verbose("appsflyer.setCurrencyCode(%s)", new Object[]{this.currencyCode});
+        this.logger.verbose("appsflyer.setCurrencyCode(%s)", new Object[] { this.currencyCode });
         this.appsflyer.setDebugLog(this.isDebug);
-        this.logger.verbose("appsflyer.setDebugLog(%s)", new Object[]{this.isDebug});
+        this.logger.verbose("appsflyer.setDebugLog(%s)", new Object[] { this.isDebug });
     }
 
     public void track(TrackPayload track) {
@@ -89,7 +89,7 @@ public class CustomAppsFlyer extends Integration<AppsFlyerLib> {
         Properties properties = track.properties();
         Map<String, Object> afProperties = Utils.transform(properties, MAPPER);
         this.appsflyer.logEvent(this.context, event, afProperties);
-        this.logger.verbose("appsflyer.logEvent(context, %s, %s)", new Object[]{event, properties});
+        this.logger.verbose("appsflyer.logEvent(context, %s, %s)", new Object[] { event, properties });
     }
 
     static {
@@ -101,17 +101,17 @@ public class CustomAppsFlyer extends Integration<AppsFlyerLib> {
             public Integration<AppsFlyerLib> create(ValueMap settings, Analytics analytics) {
                 Logger logger = analytics.logger("AppsFlyer");
                 AppsFlyerLib afLib = AppsFlyerLib.getInstance();
-                String devKey = "SefkBG76uAYCK6St9Xcw3h";//settings.getString("app_key_appsflyer");
+                String devKey = "SefkBG76uAYCK6St9Xcw3h";// settings.getString("app_key_appsflyer");
                 boolean trackAttributionData = settings.getBoolean("trackAttributionData", false);
                 Application application = analytics.getApplication();
                 AppsFlyerConversionListener listener = null;
                 if (trackAttributionData) {
                     listener = new ConversionListener(analytics);
-                }else {
+                } else {
                     listener = new ConversionListener(analytics);
 
                 }
-                afLib.addPushNotificationDeepLinkPath("test_dev_qa");
+                afLib.addPushNotificationDeepLinkPath("test_dev_qa_2");
                 afLib.setDebugLog(logger.logLevel != LogLevel.NONE);
                 afLib.setDebugLog(true);
                 afLib.init(devKey, listener, application.getApplicationContext());
@@ -119,18 +119,21 @@ public class CustomAppsFlyer extends Integration<AppsFlyerLib> {
                     AppsFlyerLib.getInstance().subscribeForDeepLink(CustomAppsFlyer.deepLinkListener);
                 }
 
-                logger.verbose("AppsFlyer.getInstance().start(%s, %s)", new Object[]{application, devKey.substring(0, 1) + "*****" + devKey.substring(devKey.length() - 2)});
+                logger.verbose("AppsFlyer.getInstance().start(%s, %s)", new Object[] { application,
+                        devKey.substring(0, 1) + "*****" + devKey.substring(devKey.length() - 2) });
                 boolean isReact = true;
 
                 try {
-                    Class.forName("com.segment.analytics.reactnative.integration.appsflyer.RNAnalyticsIntegration_AppsFlyerModule");
+                    Class.forName(
+                            "com.segment.analytics.reactnative.integration.appsflyer.RNAnalyticsIntegration_AppsFlyerModule");
                 } catch (ClassNotFoundException var11) {
                     isReact = false;
                 }
 
                 if (isReact) {
                     afLib.start(application, devKey);
-                    logger.verbose("Segment React Native AppsFlye rintegration is used, sending first launch manually", new Object[0]);
+                    logger.verbose("Segment React Native AppsFlye rintegration is used, sending first launch manually",
+                            new Object[0]);
                 }
 
                 return new CustomAppsFlyer(application, logger, afLib, devKey);
@@ -197,7 +200,10 @@ public class CustomAppsFlyer extends Integration<AppsFlyerLib> {
         }
 
         void trackInstallAttributed(Map<String, ?> attributionData) {
-            Map<String, Object> campaign = (new ValueMap()).putValue("source", this.getFromAttr(attributionData.get("media_source"))).putValue("name", this.getFromAttr(attributionData.get("campaign"))).putValue("ad_group", this.getFromAttr(attributionData.get("adgroup")));
+            Map<String, Object> campaign = (new ValueMap())
+                    .putValue("source", this.getFromAttr(attributionData.get("media_source")))
+                    .putValue("name", this.getFromAttr(attributionData.get("campaign")))
+                    .putValue("ad_group", this.getFromAttr(attributionData.get("adgroup")));
             Properties properties = (new Properties()).putValue("provider", "AppsFlyer");
             properties.putAll(attributionData);
             properties.remove("media_source");
