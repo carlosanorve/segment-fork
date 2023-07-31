@@ -1,4 +1,5 @@
 package com.example.flutter_segment;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -12,7 +13,6 @@ import com.segment.analytics.Traits;
 import com.segment.analytics.Options;
 import com.segment.analytics.integrations.BasePayload;
 import com.segment.analytics.android.integrations.amplitude.AmplitudeIntegration;
-import com.segment.analytics.android.integrations.appsflyer.AppsflyerIntegration;
 import static com.segment.analytics.Analytics.LogLevel;
 import androidx.annotation.NonNull;
 import java.io.IOException;
@@ -20,18 +20,24 @@ import java.net.HttpURLConnection;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import com.segment.analytics.android.integrations.firebase.FirebaseIntegration;
+
 
 /** FlutterSegmentPlugin */
 public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
   private Context applicationContext;
   private MethodChannel methodChannel;
   private final PropertiesMapper propertiesMapper = new PropertiesMapper();
+  private static final String TAG = "AppsFlyer-Segment";
+  private static Context context;
 
   static HashMap<String, Object> appendToContextMiddleware;
 
@@ -49,7 +55,7 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
 
     try {
       ApplicationInfo ai = applicationContext.getPackageManager()
-              .getApplicationInfo(applicationContext.getPackageName(), PackageManager.GET_META_DATA);
+          .getApplicationInfo(applicationContext.getPackageName(), PackageManager.GET_META_DATA);
 
       Bundle bundle = ai.metaData;
 
@@ -104,44 +110,46 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
         }
 
         if (options.isAppsflyerIntegrationEnabled()) {
-          analyticsBuilder.use(AppsflyerIntegration.FACTORY);
+          analyticsBuilder.use(CustomAppsFlyer.FACTORY);
+          Log.d("appsflyer", "test");
         }
+        analyticsBuilder.use(FirebaseIntegration.FACTORY);
 
         // Here we build a middleware that just appends data to the current context
         // using the [deepMerge] strategy.
         analyticsBuilder.useSourceMiddleware(
-                new Middleware() {
-                  @Override
-                  public void intercept(Chain chain) {
-                    try {
-                      if (appendToContextMiddleware == null) {
-                        chain.proceed(chain.payload());
-                        return;
-                      }
-
-                      BasePayload payload = chain.payload();
-                      Map<String, Object> originalContext = new LinkedHashMap<>(payload.context());
-                      Map<String, Object> mergedContext = FlutterSegmentPlugin.deepMerge(
-                              originalContext,
-                              appendToContextMiddleware
-                      );
-
-                      BasePayload newPayload = payload.toBuilder()
-                              .context(mergedContext)
-                              .build();
-
-                      chain.proceed(newPayload);
-                    } catch (Exception e) {
-                      Log.e("FlutterSegment", e.getMessage());
-                      chain.proceed(chain.payload());
-                    }
+            new Middleware() {
+              @Override
+              public void intercept(Chain chain) {
+                try {
+                  if (appendToContextMiddleware == null) {
+                    chain.proceed(chain.payload());
+                    return;
                   }
+
+                  BasePayload payload = chain.payload();
+                  Map<String, Object> originalContext = new LinkedHashMap<>(payload.context());
+                  Map<String, Object> mergedContext = FlutterSegmentPlugin.deepMerge(
+                      originalContext,
+                      appendToContextMiddleware);
+
+                  BasePayload newPayload = payload.toBuilder()
+                      .context(mergedContext)
+                      .build();
+
+                  chain.proceed(newPayload);
+                } catch (Exception e) {
+                  Log.e("FlutterSegment", e.getMessage());
+                  chain.proceed(chain.payload());
                 }
-        );
+              }
+            });
 
         // Set the initialized instance as globally accessible.
-        // It may throw an exception if we are trying to re-register a singleton Analytics instance.
-        // This state may happen after the app is popped (back button until the app closes)
+        // It may throw an exception if we are trying to re-register a singleton
+        // Analytics instance.
+        // This state may happen after the app is popped (back button until the app
+        // closes)
         // and opened again from the TaskManager.
         try {
           Analytics.setSingletonInstance(analyticsBuilder.build());
@@ -209,11 +217,90 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
       HashMap<String, Object> configData = call.argument("options");
       FlutterSegmentOptions options = FlutterSegmentOptions.create(configData);
       this.setupChannels(options);
+
+      // CustomAppsFlyer.setManualMode(true);
+      // CustomAppsFlyer.startAppsFlyer(applicationContext);
+      Log.d("APPSFLYER", "testest ");
+
+      // AppsFlyerLib.getInstance().start(applicationContext);
+
+      // AppsFlyerLib.getInstance().setDebugLog(true);
+
+      // AppsFlyerLib.getInstance().init("SefkBG76uAYCK6St9Xcw3h",
+      // null, applicationContext);
+      // // // AppsFlyerLib.getInstance().waitForCustomerUserId(true);
+      // AppsFlyerLib.getInstance().addPushNotificationDeepLinkPath("test_dev_qa_new");
+      // AppsFlyerLib.getInstance().start(applicationContext,
+      // "SefkBG76uAYCK6St9Xcw3h",
+      // new AppsFlyerRequestListener() {
+      // @Override
+      // public void onSuccess() {
+      // Log.i("APPSFLYER", "AppsFlyer Android - Launch sent successfully, got 200" +
+      // " response code from server");
+      // }
+
+      // @Override
+      // public void onError(int i, @NonNull String s) {
+      // Log.e("APPSFLYER", "AppsFlyer Android - Launch failed to be sent:\n" +
+      // "Error code: " + i + "\n"
+      // + "Error description: " + s);
+      // }
+      // });
+
       result.success(true);
     } catch (Exception e) {
       result.error("FlutterSegmentException", e.getLocalizedMessage(), null);
     }
+
   }
+
+  // public static final Factory FACTORY = new Integration.Factory() {
+  // @Override
+  // public Integration<AppsFlyerLib> create(ValueMap settings, Analytics
+  // analytics) {
+  // Logger logger = analytics.logger("SefkBG76uAYCK6St9Xcw3h");
+  // AppsFlyerLib afLib = AppsFlyerLib.getInstance();
+  // AppsFlyerLib.getInstance().setPluginInfo(new PluginInfo(Plugin.SEGMENT,
+  // "6.10.3"));
+  // Application application = analytics.getApplication();
+  // // afLib.setDebugLog(logger.logLevel != Analytics.LogLevel.NONE);
+  // afLib.init("SefkBG76uAYCK6St9Xcw3h", null, context);
+  // afLib.start(context, "SefkBG76uAYCK6St9Xcw3h");
+  // // RD-34040
+  // boolean isReact = true;
+  // // Check if Segment React Native integration with AppsFLyer is used
+  // try {
+  // Class.forName("com.segment.analytics.reactnative.integration.appsflyer.RNAnalyticsIntegration_AppsFlyerModule");
+  // } catch (ClassNotFoundException e) {
+  // // Segment React Native integration with AppsFLyer is NOT used
+  // isReact = false;
+  // }
+  // // Segment React Native integration with AppsFLyer is used, we need to send
+  // // first launch manually
+  // if (isReact) {
+  // afLib.start(application, "SefkBG76uAYCK6St9Xcw3h");
+  // logger.verbose("Segment React Native AppsFlye rintegration is used, sending
+  // first launch manually");
+  // }
+
+  // return new AppsflyerIntegration(application, null, afLib,
+  // "SefkBG76uAYCK6St9Xcw3h");
+  // }
+
+  // @Override
+  // public String key() {
+  // return "SefkBG76uAYCK6St9Xcw3h";
+  // }
+  // };
+
+  // public void AppsflyerIntegration(Context context, Logger logger, AppsFlyerLib
+  // afLib, String devKey) {
+  // this.context = context;
+  // this.logger = logger;
+  // this.appsflyer = afLib;
+  // this.appsFlyerDevKey = devKey;
+  // this.isDebug = (logger.logLevel != Analytics.LogLevel.NONE);
+  // }
 
   private void identify(MethodCall call, Result result) {
     try {
@@ -228,14 +315,13 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
   }
 
   private void callIdentify(
-    String userId,
-    HashMap<String, Object> traitsData,
-    HashMap<String, Object> optionsData
-  ) {
+      String userId,
+      HashMap<String, Object> traitsData,
+      HashMap<String, Object> optionsData) {
     Traits traits = new Traits();
     Options options = this.buildOptions(optionsData);
 
-    for(Map.Entry<String, Object> trait : traitsData.entrySet()) {
+    for (Map.Entry<String, Object> trait : traitsData.entrySet()) {
       String key = trait.getKey();
       Object value = trait.getValue();
       traits.putValue(key, value);
@@ -257,10 +343,9 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
   }
 
   private void callTrack(
-    String eventName,
-    HashMap<String, Object> propertiesData,
-    HashMap<String, Object> optionsData
-  ) {
+      String eventName,
+      HashMap<String, Object> propertiesData,
+      HashMap<String, Object> optionsData) {
     Properties properties = propertiesMapper.buildProperties(propertiesData);
     Options options = this.buildOptions(optionsData);
 
@@ -280,10 +365,9 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
   }
 
   private void callScreen(
-    String screenName,
-    HashMap<String, Object> propertiesData,
-    HashMap<String, Object> optionsData
-  ) {
+      String screenName,
+      HashMap<String, Object> propertiesData,
+      HashMap<String, Object> optionsData) {
     Properties properties = propertiesMapper.buildProperties(propertiesData);
     Options options = this.buildOptions(optionsData);
 
@@ -303,14 +387,13 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
   }
 
   private void callGroup(
-    String groupId,
-    HashMap<String, Object> traitsData,
-    HashMap<String, Object> optionsData
-  ) {
+      String groupId,
+      HashMap<String, Object> traitsData,
+      HashMap<String, Object> optionsData) {
     Traits traits = new Traits();
     Options options = this.buildOptions(optionsData);
 
-    for(Map.Entry<String, Object> trait : traitsData.entrySet()) {
+    for (Map.Entry<String, Object> trait : traitsData.entrySet()) {
       String key = trait.getKey();
       Object value = trait.getValue();
       traits.putValue(key, value);
@@ -390,8 +473,10 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
   }
 
   /**
-   * Enables / disables / sets custom integration properties so Segment can properly
+   * Enables / disables / sets custom integration properties so Segment can
+   * properly
    * interact with 3rd parties, such as Amplitude.
+   * 
    * @see https://segment.com/docs/connections/sources/catalog/libraries/mobile/android/#selecting-destinations
    * @see https://github.com/segmentio/analytics-android/blob/master/analytics/src/main/java/com/segment/analytics/Options.java
    */
@@ -400,16 +485,17 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
     Options options = new Options();
 
     if (optionsData != null &&
-      optionsData.containsKey("integrations") &&
-      (optionsData.get("integrations") instanceof HashMap)) {
-      for (Map.Entry<String, Object> integration : ((HashMap<String,Object>)optionsData.get("integrations")).entrySet()) {
+        optionsData.containsKey("integrations") &&
+        (optionsData.get("integrations") instanceof HashMap)) {
+      for (Map.Entry<String, Object> integration : ((HashMap<String, Object>) optionsData.get("integrations"))
+          .entrySet()) {
         String key = integration.getKey();
 
         if (integration.getValue() instanceof HashMap) {
-          HashMap<String, Object> values = ((HashMap<String, Object>)integration.getValue());
+          HashMap<String, Object> values = ((HashMap<String, Object>) integration.getValue());
           options.setIntegrationOptions(key, values);
         } else if (integration.getValue() instanceof Boolean) {
-          Boolean value = ((Boolean)integration.getValue());
+          Boolean value = ((Boolean) integration.getValue());
           options.setIntegration(key, value);
         }
       }
