@@ -111,7 +111,7 @@ public class CustomAppsFlyer extends Integration<AppsFlyerLib> {
                     listener = new ConversionListener(analytics);
 
                 }
-                afLib.addPushNotificationDeepLinkPath("test_dev_qa_2");
+                afLib.addPushNotificationDeepLinkPath("af_push_one_link");
                 afLib.setDebugLog(logger.logLevel != LogLevel.NONE);
                 afLib.setDebugLog(true);
                 afLib.init(devKey, listener, application.getApplicationContext());
