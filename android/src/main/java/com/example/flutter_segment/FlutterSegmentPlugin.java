@@ -108,7 +108,7 @@ public class FlutterSegmentPlugin implements MethodCallHandler, FlutterPlugin {
         if (options.isAppsflyerIntegrationEnabled()) {
           analyticsBuilder.use(AppsflyerIntegration.FACTORY);
         }
-        if (!options.getDisableFirebase) {
+        if (!options.getDisableFirebase()) {
           analyticsBuilder.use(FirebaseIntegration.FACTORY);
         }
         // Here we build a middleware that just appends data to the current context
