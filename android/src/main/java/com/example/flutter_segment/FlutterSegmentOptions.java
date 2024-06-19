@@ -100,7 +100,7 @@ public class FlutterSegmentOptions {
         Boolean isAmplitudeIntegrationEnabled = bundle.getBoolean("com.claimsforce.segment.ENABLE_AMPLITUDE_INTEGRATION", false);
         Boolean isAppsflyerIntegrationEnabled = bundle.getBoolean("com.claimsforce.segment.ENABLE_APPSFLYER_INTEGRATION", false);
         Boolean debug = bundle.getBoolean("com.claimsforce.segment.DEBUG", false);
-        Boolean disableFirebase = true;
+        Boolean disableFirebase = Boolean.TRUE;
         String cdnSettingsProxyHost = bundle.getString("com.claimsforce.segment.CDN_SETTINGS_PROXY_HOST");
         String cdnProxyHost = bundle.getString("com.claimsforce.segment.CDN_PROXY_HOST");
         String apiProxyHost = bundle.getString("com.claimsforce.segment.API_PROXY_HOST");
