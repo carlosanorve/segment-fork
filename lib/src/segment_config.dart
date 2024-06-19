@@ -5,10 +5,10 @@ class SegmentConfig {
       this.amplitudeIntegrationEnabled = false,
       this.appsflyerIntegrationEnabled = false,
       this.debug = false,
-      this.disableFirebase = true,
       required this.cdnSettingsProxyHost,
       required this.cdnProxyHost,
       required this.apiProxyHost,
+      this.disableFirebase = true
       });
 
   final String writeKey;
