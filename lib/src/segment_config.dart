@@ -5,15 +5,18 @@ class SegmentConfig {
       this.amplitudeIntegrationEnabled = false,
       this.appsflyerIntegrationEnabled = false,
       this.debug = false,
+      this.disableFirebase = true,
       required this.cdnSettingsProxyHost,
       required this.cdnProxyHost,
-      required this.apiProxyHost});
+      required this.apiProxyHost,
+      });
 
   final String writeKey;
   final bool trackApplicationLifecycleEvents;
   final bool amplitudeIntegrationEnabled;
   final bool appsflyerIntegrationEnabled;
   final bool debug;
+  final bool disableFirebase;
   final String cdnSettingsProxyHost;
   final String cdnProxyHost;
   final String apiProxyHost;
@@ -28,6 +31,7 @@ class SegmentConfig {
       'cdnSettingsProxyHost': cdnSettingsProxyHost,
       'cdnProxyHost': cdnProxyHost,
       'apiProxyHost': apiProxyHost,
+      'disableFirebase':disableFirebase
     };
   }
 }
