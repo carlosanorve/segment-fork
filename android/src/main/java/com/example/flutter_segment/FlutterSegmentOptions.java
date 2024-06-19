@@ -13,6 +13,7 @@ public class FlutterSegmentOptions {
     private final String cdnSettingsProxyHost;
     private final String cdnProxyHost;
     private final String apiProxyHost;
+    private final Boolean disableFirebase;
 
     public  FlutterSegmentOptions(
             String writeKey,
@@ -22,7 +23,8 @@ public class FlutterSegmentOptions {
             Boolean debug,
             String cdnSettingsProxyHost,
             String cdnProxyHost,
-            String apiProxyHost
+            String apiProxyHost,
+            Boolean disableFirebase
     ) {
         this.writeKey = writeKey;
         this.trackApplicationLifecycleEvents = trackApplicationLifecycleEvents;
@@ -32,6 +34,7 @@ public class FlutterSegmentOptions {
         this.cdnSettingsProxyHost = cdnSettingsProxyHost;
         this.cdnProxyHost = cdnProxyHost;
         this.apiProxyHost = apiProxyHost;
+        this.disableFirebase=disableFirebase;
     }
 
     public String getWriteKey() {
@@ -53,6 +56,9 @@ public class FlutterSegmentOptions {
     public Boolean getDebug() {
         return debug;
     }
+    public Boolean getDisableFirebase() {
+        return disableFirebase;
+    }
 
     public String getCdnSettingsProxyHost() {
         return cdnSettingsProxyHost;
@@ -72,10 +78,11 @@ public class FlutterSegmentOptions {
         Boolean isAmplitudeIntegrationEnabled = bundle.getBoolean("com.claimsforce.segment.ENABLE_AMPLITUDE_INTEGRATION", false);
         Boolean isAppsflyerIntegrationEnabled = bundle.getBoolean("com.claimsforce.segment.ENABLE_APPSFLYER_INTEGRATION", false);
         Boolean debug = bundle.getBoolean("com.claimsforce.segment.DEBUG", false);
+        Boolean disableFirebase = true;
         String cdnSettingsProxyHost = bundle.getString("com.claimsforce.segment.CDN_SETTINGS_PROXY_HOST");
         String cdnProxyHost = bundle.getString("com.claimsforce.segment.CDN_PROXY_HOST");
         String apiProxyHost = bundle.getString("com.claimsforce.segment.API_PROXY_HOST");
-        return new FlutterSegmentOptions(writeKey, trackApplicationLifecycleEvents, isAmplitudeIntegrationEnabled, isAppsflyerIntegrationEnabled, debug, cdnSettingsProxyHost, cdnProxyHost, apiProxyHost);
+        return new FlutterSegmentOptions(writeKey, trackApplicationLifecycleEvents, isAmplitudeIntegrationEnabled, isAppsflyerIntegrationEnabled, debug, cdnSettingsProxyHost, cdnProxyHost, apiProxyHost,disableFirebase);
     }
 
     static FlutterSegmentOptions create(HashMap<String, Object> options) {
@@ -84,10 +91,11 @@ public class FlutterSegmentOptions {
         Boolean isAmplitudeIntegrationEnabled = orFalse((Boolean) options.get("amplitudeIntegrationEnabled"));
         Boolean isAppsflyerIntegrationEnabled = orFalse((Boolean) options.get("appsflyerIntegrationEnabled"));
         Boolean debug = orFalse((Boolean) options.get("debug"));
+        Boolean disableFirebase = orFalse((Boolean) options.get("disableFirebase"));
         String cdnSettingsProxyHost = (String) options.get("cdnSettingsProxyHost");
         String cdnProxyHost = (String) options.get("cdnProxyHost");
         String apiProxyHost = (String) options.get("apiProxyHost");
-        return new FlutterSegmentOptions(writeKey, trackApplicationLifecycleEvents, isAmplitudeIntegrationEnabled, isAppsflyerIntegrationEnabled, debug, cdnSettingsProxyHost, cdnProxyHost, apiProxyHost);
+        return new FlutterSegmentOptions(writeKey, trackApplicationLifecycleEvents, isAmplitudeIntegrationEnabled, isAppsflyerIntegrationEnabled, debug, cdnSettingsProxyHost, cdnProxyHost, apiProxyHost,disableFirebase);
     }
 
     private static Boolean orFalse(Boolean value) {
