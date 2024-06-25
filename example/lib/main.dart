@@ -12,9 +12,6 @@ void main() async {
     options: SegmentConfig(
       writeKey: 'YOUR_WRITE_KEY_GOES_HERE',
       trackApplicationLifecycleEvents: false,
-      apiProxyHost: "",
-      cdnProxyHost: "",
-      cdnSettingsProxyHost: ""
     ),
   );
 

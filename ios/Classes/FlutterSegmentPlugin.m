@@ -402,7 +402,6 @@ static BOOL wasSetupFromFile = NO;
     BOOL trackApplicationLifecycleEvents = [[dict objectForKey: @"trackApplicationLifecycleEvents"] boolValue];
     BOOL isAmplitudeIntegrationEnabled = [[dict objectForKey: @"amplitudeIntegrationEnabled"] boolValue];
     BOOL isAppsflyerIntegrationEnabled = [[dict objectForKey: @"appsflyerIntegrationEnabled"] boolValue];
-    BOOL disableFirebase = [[dict objectForKey: @"disableFirebase"] boolValue];
     NSString *apiProxyHost = [dict objectForKey: @"apiProxyHost"];
     NSString *cdnProxyHost = [dict objectForKey: @"cdnProxyHost"];
     NSString *cdnSettingsProxyHost = [dict objectForKey: @"cdnSettingsProxyHost"];
@@ -419,9 +418,8 @@ static BOOL wasSetupFromFile = NO;
     if (isAppsflyerIntegrationEnabled) {
       [configuration use:[SEGAppsFlyerIntegrationFactory instance]];
     }
-    if (!disableFirebase) {
-        [configuration use:[SEGFirebaseIntegrationFactory instance]];
-    }
+
+    [configuration use:[SEGFirebaseIntegrationFactory instance]];
 
     configuration.requestFactory = ^(NSURL *url) {
         NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
